@@ -1,21 +1,22 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 from Graphics import Line, Point
 
 
 def line_constructor(
-    window_size: Tuple[int, int],
-    _from: Tuple[int, int],
-    _to: Tuple[int, int],
+    _from: Point | Tuple[int, int],
+    _to: Point | Tuple[int, int],
+    window: Optional["Window"] = None,
 ) -> Line:
 
-    errmsg = "Points must lie within the size limit of the window"
-    if not (_from[0] < window_size[0] and _from[1] < window_size[1]):
-        raise ValueError(errmsg)
+    window_size: Optional[Tuple[int, int]] = None
+    if window:
+        window_size = (window.width, window.height)
 
-    if not (_to[0] < window_size[0] and _to[1] < window_size[1]):
-        raise ValueError(errmsg)
+    if not isinstance(_from, Point):
+        _from = Point(_from[0], _from[1], window_size=window_size)
 
-    from_point = Point(_from[0], _from[1])
-    to_point = Point(_to[0], _to[1])
-    return Line(from_point, to_point)
+    if not isinstance(_to, Point):
+        _to = Point(_to[0], _to[1], window_size=window_size)
+
+    return Line(_from, _to)

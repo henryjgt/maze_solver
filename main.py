@@ -1,13 +1,23 @@
-from GUI import Window
-from Graphics import Line, line_constructor
+from GUI import Window, DisplayedCell
+
+# from Graphics import Line, line_constructor
 
 
 def main() -> None:
     win = Window(WIDTH_PX, HEIGHT_PX)
-    L1: Line = line_constructor((WIDTH_PX, HEIGHT_PX), (100, 100), (100, 500))
-    L2: Line = line_constructor((WIDTH_PX, HEIGHT_PX), (100, 100), (600, 500))
-    win.draw_line(L1, "red")
-    win.draw_line(L2, "blue")
+    # L1: Line = line_constructor(
+    #     (100, 100),
+    #     (100, 500),
+    #     window_size=(WIDTH_PX, HEIGHT_PX),
+    # )
+    # L2: Line = line_constructor(
+    #     (100, 100),
+    #     (600, 500),
+    #     window_size=(WIDTH_PX, HEIGHT_PX),
+    # )
+    # win.draw_line(L1, "red")
+    # win.draw_line(L2, "blue")
+
     win.wait_for_close()
 
 

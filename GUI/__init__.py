@@ -1,3 +1,3 @@
-from .gui import Window
+from .gui import Window, DisplayedCell
 
-__all__: list[str] = ["Window"]
+__all__: list[str] = ["Window", "DisplayedCell"]
