@@ -1,25 +1,16 @@
+import math as m
 import tkinter as tk
 from typing import Optional, Tuple
 
 
 class Point:
 
-    __errmsg: str = "Points must lie within the size limit of the window"
-
     def __init__(self, x: int, y: int, window_size: Optional[Tuple] = None) -> None:
-        self._x: int = x
-        self._y: int = y
-
         if window_size and not (0 < x < window_size[0] or 0 < y < window_size[1]):
-            raise ValueError(self.__errmsg)
+            raise ValueError("Points must lie within the canvas boundaries")
 
-    @property
-    def x(self) -> int:
-        return self._x
-
-    @property
-    def y(self) -> int:
-        return self._y
+        self.x: int = x
+        self.y: int = y
 
 
 class Line:
@@ -34,13 +25,17 @@ class Line:
         )
 
 
-class Box:
+class Square:
 
     def __init__(self, top_left: Point, bottom_right: Point) -> None:
         self._top_left_x: int = top_left.x
         self._top_left_y: int = top_left.y
         self._bottom_right_x: int = bottom_right.x
         self._bottom_right_y: int = bottom_right.y
+
+        x_centre: int = m.floor(0.5 * (self._bottom_right_x - self._top_left_x))
+        y_centre: int = m.floor(0.5 * (self._bottom_right_y - self._top_left_y))
+        self._centre = Point(x_centre, y_centre)
 
         self.has_left_wall: bool = True
         self.has_right_wall: bool = True

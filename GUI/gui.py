@@ -1,7 +1,6 @@
-import math as m
 import tkinter as tk
 
-from Graphics import Box, Line, Point
+from Graphics import Square, Line, Point
 from Graphics import line_constructor
 
 
@@ -42,7 +41,7 @@ class Window:
         line.draw(self.__canvas, fill_color)
 
 
-class Cell(Box):
+class Cell(Square):
     def __init__(self, top_left: Point, top_right: Point, window: Window) -> None:
         super().__init__(top_left, top_right)
         self._window: Window = window
@@ -71,18 +70,7 @@ class Cell(Box):
 
     def draw_move(self, to_cell: "Cell", undo=False) -> None:
         color: str = "red" if not undo else "gray"
-
-        # fmt: off
-        x_centre: int = m.floor(0.5 * (self._bottom_right_x - self._top_left_x))
-        y_centre: int = m.floor(0.5 * (self._bottom_right_y - self._top_left_y))
-        self._centre = Point(x_centre, y_centre)
-
-        target_x_centre: int = m.floor(0.5 * (to_cell._bottom_right_x - to_cell._top_left_x))
-        target_y_centre: int = m.floor(0.5 * (to_cell._bottom_right_y - to_cell._top_left_y))
-        _target_centre = Point(target_x_centre, target_y_centre)
-        # fmt: on
-
-        self._window.draw_line(line_constructor(self._centre, _target_centre, color))
+        self._window.draw_line(line_constructor(self._centre, to_cell._centre, color))
 
 
 class Maze:
