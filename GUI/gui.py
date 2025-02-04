@@ -5,7 +5,6 @@ from Graphics import line_constructor
 
 
 class Window:
-
     def __init__(self, width: int, height: int) -> None:
         self._width: int = width
         self._height: int = height
@@ -49,24 +48,16 @@ class Cell(Square):
     def draw(self) -> None:
 
         if self.has_left_wall:
-            _p1 = Point(self._top_left_x, self._top_left_y)
-            _p2 = Point(self._top_left_x, self._bottom_right_y)
-            self._window.draw_line(line_constructor(_p1, _p2))
+            self._window.draw_line(self.left_wall)
 
         if self.has_right_wall:
-            _p1 = Point(self._bottom_right_x, self._top_left_y)
-            _p2 = Point(self._bottom_right_x, self._bottom_right_y)
-            self._window.draw_line(line_constructor(_p1, _p2))
+            self._window.draw_line(self.right_wall)
 
         if self.has_bottom_wall:
-            _p1 = Point(self._top_left_x, self._bottom_right_y)
-            _p2 = Point(self._bottom_right_x, self._bottom_right_y)
-            self._window.draw_line(line_constructor(_p1, _p2))
+            self._window.draw_line(self.bottom_wall)
 
         if self.has_top_wall:
-            _p1 = Point(self._top_left_x, self._top_left_y)
-            _p2 = Point(self._bottom_right_x, self._top_left_y)
-            self._window.draw_line(line_constructor(_p1, _p2))
+            self._window.draw_line(self.top_wall)
 
     def draw_move(self, to_cell: "Cell", undo=False) -> None:
         color: str = "red" if not undo else "gray"
@@ -91,6 +82,8 @@ class Maze:
         self.cell_size_x: int = cell_size_x
         self.cell_size_y: int = cell_size_y
         self._window: Window = window
+
+        self._create_cells()
 
     def _create_cells(self): ...
 
