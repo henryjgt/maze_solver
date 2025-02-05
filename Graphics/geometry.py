@@ -11,6 +11,9 @@ class Point:
         self.x: int = x
         self.y: int = y
 
+    def __repr__(self) -> str:
+        return f"Point({self.x}, {self.y})"
+
 
 class Line:
     def __init__(self, p1: Point, p2: Point) -> None:
@@ -43,7 +46,6 @@ class Square:
         self.__bottom_right_x: int = bottom_right.x
         self.__bottom_right_y: int = bottom_right.y
 
-        self._centre: Optional[Point] = None
         self._left_wall: Optional[Line] = None
         self._right_wall: Optional[Line] = None
         self._top_wall: Optional[Line] = None
@@ -51,48 +53,40 @@ class Square:
 
     @property
     def centre(self) -> Point:
-        if self._centre:
-            return self._centre
-
-        _x_centre: int = m.floor(0.5 * (self.__bottom_right_x - self.__top_left_x))
-        _y_centre: int = m.floor(0.5 * (self.__bottom_right_y - self.__top_left_y))
-        self._centre = Point(_x_centre, _y_centre)
-        return self._centre
+        _x_centre: int = m.floor(0.5 * (self.__bottom_right_x + self.__top_left_x))
+        _y_centre: int = m.floor(0.5 * (self.__bottom_right_y + self.__top_left_y))
+        return Point(_x_centre, _y_centre)
 
     @property
     def left_wall(self) -> Line:
-        if self._left_wall:
-            return self._left_wall
-        _p1 = Point(self.__top_left_x, self.__top_left_y)
-        _p2 = Point(self.__top_left_x, self.__bottom_right_y)
-        self._left_wall: Line = line_constructor(_p1, _p2)
+        if self._left_wall is None:
+            _p1 = Point(self.__top_left_x, self.__top_left_y)
+            _p2 = Point(self.__top_left_x, self.__bottom_right_y)
+            self._left_wall: Line = line_constructor(_p1, _p2)
         return self._left_wall
 
     @property
     def right_wall(self) -> Line:
-        if self._right_wall:
-            return self._right_wall
-        _p1 = Point(self.__bottom_right_x, self.__top_left_y)
-        _p2 = Point(self.__bottom_right_x, self.__bottom_right_y)
-        self._right_wall: Line = line_constructor(_p1, _p2)
+        if self._right_wall is None:
+            _p1 = Point(self.__bottom_right_x, self.__top_left_y)
+            _p2 = Point(self.__bottom_right_x, self.__bottom_right_y)
+            self._right_wall: Line = line_constructor(_p1, _p2)
         return self._right_wall
 
     @property
     def top_wall(self) -> Line:
-        if self._top_wall:
-            return self._top_wall
-        _p1 = Point(self.__top_left_x, self.__top_left_y)
-        _p2 = Point(self.__bottom_right_x, self.__top_left_y)
-        self._top_wall: Line = line_constructor(_p1, _p2)
+        if self._top_wall is None:
+            _p1 = Point(self.__top_left_x, self.__top_left_y)
+            _p2 = Point(self.__bottom_right_x, self.__top_left_y)
+            self._top_wall: Line = line_constructor(_p1, _p2)
         return self._top_wall
 
     @property
     def bottom_wall(self) -> Line:
-        if self._bottom_wall:
-            return self._bottom_wall
-        _p1 = Point(self.__top_left_x, self.__bottom_right_y)
-        _p2 = Point(self.__bottom_right_x, self.__bottom_right_y)
-        self._bottom_wall: Line = line_constructor(_p1, _p2)
+        if self._bottom_wall is None:
+            _p1 = Point(self.__top_left_x, self.__bottom_right_y)
+            _p2 = Point(self.__bottom_right_x, self.__bottom_right_y)
+            self._bottom_wall: Line = line_constructor(_p1, _p2)
         return self._bottom_wall
 
 

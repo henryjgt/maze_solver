@@ -3,14 +3,14 @@ import math as m
 from GUI import Maze, Window
 
 
-WIDTH_PX: int = 800  # x
-HEIGHT_PX: int = 600  # y
+WIDTH_PX: int = 700  # x
+HEIGHT_PX: int = 700  # y
 
 
 def main() -> None:
-    num_rows = 10
-    num_cols = 10
-    margin = 50
+    num_rows: int = 15
+    num_cols: int = 15
+    margin: int = 50
     cell_size_x: int = m.floor((WIDTH_PX - 2 * margin) / num_cols)
     cell_size_y: int = m.floor((HEIGHT_PX - 2 * margin) / num_rows)
 
@@ -22,10 +22,10 @@ def main() -> None:
         num_cols,
         cell_size_x,
         cell_size_y,
-        win,
-        seed=0,
+        window=win,
+        # seed=0,
     )
-    # maze.solve()
+    maze.solve()
 
     win.wait_for_close()
 

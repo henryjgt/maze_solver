@@ -12,7 +12,7 @@ class Window:
         self._height: int = height
         self.__running: bool = False
         self.__root = tk.Tk()
-        self.__root.title("DEMO GUI")
+        self.__root.title("Python Maze Solver")
         self.__canvas = tk.Canvas(width=width, height=height)
         self.__canvas.pack()
         self.__root.protocol("WM_DELETE_WINDOW", self.close)
@@ -94,7 +94,7 @@ class Cell(Square):
         if not isinstance(self._window, Window):
             return
         color: str = "gray" if undo else "red"
-        self._window.draw_line(Line(self.centre, to_cell.centre), color)
+        self._window.draw_line(Line(self.centre, to_cell.centre), fill_color=color)
 
     @property
     def walls(self) -> dict:
@@ -143,18 +143,16 @@ class Maze:
                 self._window.width,
                 self._window.height,
             )
-        self.seed: Optional[int] = random.seed(seed) if not seed else None
-        self._cells = []
+        if seed is not None:
+            random.seed(seed)
 
+        self._cells = []
         self._create_cells()
         self._break_entrance_and_exit()
         self._break_walls_r(0, 0)
         self._reset_cells_visited()
         if isinstance(self._window, Window):
             self._animate()
-            self._window.draw_line(Line(Point(0, 0), Point(2, 2)), "red")
-            self._window.redraw()
-        print("setup done")
 
     def _create_cells(self) -> None:
         self._cells: list[list[Cell]] = []
@@ -177,13 +175,14 @@ class Maze:
     def _draw_cell(self, col, row) -> None:
         cell: Cell = self._cells[col][row]
         cell.draw()
-        self._animate()
+        self._animate(_sleep=None)
 
-    def _animate(self) -> None:
+    def _animate(self, _sleep: Optional[float] = 0.03) -> None:
         if not isinstance(self._window, Window):
             return
         self._window.redraw()
-        time.sleep(0.01)
+        if _sleep:
+            time.sleep(_sleep)
 
     def _break_entrance_and_exit(self) -> None:
         if not isinstance(self._window, Window):
@@ -233,10 +232,6 @@ class Maze:
                 self._cells[col][row]._visited = False
 
     def solve(self) -> bool:
-        if isinstance(self._window, Window):
-            print("drawing stupid red line")
-            self._window.draw_line(Line(Point(0, 0), Point(9, 9)), "red")
-            self._window.redraw()
         return self._solve_r(0, 0)
 
     def _solve_r(self, col, row) -> bool:
@@ -246,7 +241,6 @@ class Maze:
         adjacent_cells: dict[str, tuple[int, int]] = self.get_adjacency(col, row)
 
         if cell == self._cells[-1][-1]:
-            print("solved!")
             return True
 
         for direction, indices in adjacent_cells.items():
