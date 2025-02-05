@@ -1,7 +1,9 @@
+import random
+import time
 import tkinter as tk
+from typing import Optional
 
 from Graphics import Square, Line, Point
-from Graphics import line_constructor
 
 
 class Window:
@@ -9,7 +11,6 @@ class Window:
         self._width: int = width
         self._height: int = height
         self.__running: bool = False
-
         self.__root = tk.Tk()
         self.__root.title("DEMO GUI")
         self.__canvas = tk.Canvas(width=width, height=height)
@@ -39,66 +40,229 @@ class Window:
     def draw_line(self, line: Line, fill_color: str = "black") -> None:
         line.draw(self.__canvas, fill_color)
 
+    def delete_line(self, line: Line) -> None:
+        line.delete(self.__canvas)
+
 
 class Cell(Square):
-    def __init__(self, top_left: Point, top_right: Point, window: Window) -> None:
-        super().__init__(top_left, top_right)
-        self._window: Window = window
+    def __init__(
+        self,
+        top_left: Point,
+        bottom_right: Point,
+        window: Optional[Window] = None,
+    ) -> None:
+
+        super().__init__(top_left, bottom_right)
+        self._window: Optional[Window] = window
+        self._visited = False
 
     def draw(self) -> None:
-
+        if not isinstance(self._window, Window):
+            return
         if self.has_left_wall:
             self._window.draw_line(self.left_wall)
-
         if self.has_right_wall:
             self._window.draw_line(self.right_wall)
-
         if self.has_bottom_wall:
             self._window.draw_line(self.bottom_wall)
-
         if self.has_top_wall:
             self._window.draw_line(self.top_wall)
 
+    def delete_side(self, side: str) -> None:
+        if not isinstance(self._window, Window):
+            return
+
+        match side:
+            case "top":
+                if self.has_top_wall:
+                    self._window.delete_line(self.top_wall)
+                    self.has_top_wall = False
+            case "left":
+                if self.has_left_wall:
+                    self._window.delete_line(self.left_wall)
+                    self.has_left_wall = False
+            case "right":
+                if self.has_right_wall:
+                    self._window.delete_line(self.right_wall)
+                    self.has_right_wall = False
+            case "bottom":
+                if self.has_bottom_wall:
+                    self._window.delete_line(self.bottom_wall)
+                    self.has_bottom_wall = False
+
     def draw_move(self, to_cell: "Cell", undo=False) -> None:
-        color: str = "red" if not undo else "gray"
-        self._window.draw_line(line_constructor(self._centre, to_cell._centre, color))
+        if not isinstance(self._window, Window):
+            return
+        color: str = "gray" if undo else "red"
+        self._window.draw_line(Line(self.centre, to_cell.centre), color)
+
+    @property
+    def walls(self) -> dict:
+        return {
+            "left": self.has_left_wall,
+            "right": self.has_right_wall,
+            "top": self.has_top_wall,
+            "bottom": self.has_bottom_wall,
+        }
+
+    def has_wall(self, side: str) -> bool:
+        return self.walls[side]
 
 
 class Maze:
+
+    _map_to_target: dict[str, str] = {
+        "left": "right",
+        "right": "left",
+        "top": "bottom",
+        "bottom": "top",
+    }
+
     def __init__(
         self,
-        x1: int,
-        y1: int,
+        x0: int,
+        y0: int,
         num_rows: int,
         num_cols: int,
         cell_size_x: int,
         cell_size_y: int,
-        window: Window,
+        window: Optional[Window] = None,
+        seed: Optional[int] = None,
     ) -> None:
-        self.x1: int = x1
-        self.y1: int = y1
+
+        self.x0: int = x0
+        self.y0: int = y0
         self.num_rows: int = num_rows
         self.num_cols: int = num_cols
         self.cell_size_x: int = cell_size_x
         self.cell_size_y: int = cell_size_y
-        self._window: Window = window
+        self._window: Optional[Window] = window
+        self._window_size: Optional[tuple] = None
+        if isinstance(self._window, Window):
+            self._window_size: Optional[tuple] = (
+                self._window.width,
+                self._window.height,
+            )
+        self.seed: Optional[int] = random.seed(seed) if not seed else None
+        self._cells = []
 
         self._create_cells()
+        self._break_entrance_and_exit()
+        self._break_walls_r(0, 0)
+        self._reset_cells_visited()
+        if isinstance(self._window, Window):
+            self._animate()
+            self._window.draw_line(Line(Point(0, 0), Point(2, 2)), "red")
+            self._window.redraw()
+        print("setup done")
 
-    def _create_cells(self): ...
+    def _create_cells(self) -> None:
+        self._cells: list[list[Cell]] = []
+        for col in range(self.num_cols):
+            col_cells: list[Cell] = []
+            for row in range(self.num_rows):
+                cell_top_left_x: int = self.x0 + col * self.cell_size_x
+                cell_top_left_y: int = self.y0 + row * self.cell_size_y
+                tl_point = Point(cell_top_left_x, cell_top_left_y, self._window_size)
+                cell_bottom_right_x: int = cell_top_left_x + self.cell_size_x
+                cell_bottom_right_y: int = cell_top_left_y + self.cell_size_y
+                br_point = Point(cell_bottom_right_x, cell_bottom_right_y, self._window_size)  # fmt: skip
+                col_cells.append(Cell(tl_point, br_point, window=self._window))
+            self._cells.append(col_cells)
 
-    def _draw_cell(self): ...
+        for col in range(self.num_cols):
+            for row in range(self.num_rows):
+                self._draw_cell(col, row)
 
-    def _animate(self): ...
+    def _draw_cell(self, col, row) -> None:
+        cell: Cell = self._cells[col][row]
+        cell.draw()
+        self._animate()
 
+    def _animate(self) -> None:
+        if not isinstance(self._window, Window):
+            return
+        self._window.redraw()
+        time.sleep(0.01)
 
-if __name__ == "__main__":
-    win = Window(800, 600)
+    def _break_entrance_and_exit(self) -> None:
+        if not isinstance(self._window, Window):
+            return
+        start_cell: Cell = self._cells[0][0]
+        start_cell.delete_side("top")
+        finish_cell: Cell = self._cells[-1][-1]
+        finish_cell.delete_side("bottom")
+        self._animate()
 
-    c1 = Cell(Point(100, 100), Point(400, 400), win)
-    c1.draw()
+    def get_adjacency(self, col, row) -> dict[str, tuple[int, int]]:
+        return {
+            "left": (col - 1, row),
+            "right": (col + 1, row),
+            "top": (col, row - 1),
+            "bottom": (col, row + 1),
+        }
 
-    c2 = Cell(Point(200, 200), Point(500, 500), win)
-    c2.draw()
+    def _break_walls_r(self, col, row) -> None:
+        cell: Cell = self._cells[col][row]
+        cell._visited = True
+        adjacent_cells: dict[str, tuple[int, int]] = self.get_adjacency(col, row)
+        while True:
+            unvisited_neighbours: dict[str, Cell] = {}
+            for direction, indices in adjacent_cells.items():
+                if not (
+                    (0 <= indices[0] < self.num_cols)
+                    and (0 <= indices[1] < self.num_rows)
+                ):
+                    continue
+                neighbour: Cell = self._cells[indices[0]][indices[1]]
+                if not neighbour._visited:
+                    unvisited_neighbours.update({direction: neighbour})
 
-    win.wait_for_close()
+            if len(unvisited_neighbours.keys()) <= 0:
+                return
+
+            direction: str = random.choice(list(unvisited_neighbours.keys()))
+            target_cell: Cell = unvisited_neighbours[direction]
+            cell.delete_side(direction)
+            target_cell.delete_side(self._map_to_target[direction])
+            self._break_walls_r(*adjacent_cells[direction])
+
+    def _reset_cells_visited(self) -> None:
+        for col in range(self.num_cols):
+            for row in range(self.num_rows):
+                self._cells[col][row]._visited = False
+
+    def solve(self) -> bool:
+        if isinstance(self._window, Window):
+            print("drawing stupid red line")
+            self._window.draw_line(Line(Point(0, 0), Point(9, 9)), "red")
+            self._window.redraw()
+        return self._solve_r(0, 0)
+
+    def _solve_r(self, col, row) -> bool:
+        self._animate()
+        cell: Cell = self._cells[col][row]
+        cell._visited = True
+        adjacent_cells: dict[str, tuple[int, int]] = self.get_adjacency(col, row)
+
+        if cell == self._cells[-1][-1]:
+            print("solved!")
+            return True
+
+        for direction, indices in adjacent_cells.items():
+            if cell.has_wall(direction):
+                continue
+            if not (
+                (0 <= indices[0] < self.num_cols) and (0 <= indices[1] < self.num_rows)
+            ):
+                continue
+            target: Cell = self._cells[indices[0]][indices[1]]
+            if not target._visited:
+                cell.draw_move(target)
+                progress: bool = self._solve_r(indices[0], indices[1])
+                if progress:
+                    return True
+                else:
+                    cell.draw_move(target, undo=True)
+        else:
+            return False

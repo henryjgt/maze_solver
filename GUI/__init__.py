@@ -1,3 +1,3 @@
-from .gui import Window, DisplayedCell
+from .gui import Window, Maze
 
-__all__: list[str] = ["Window", "DisplayedCell"]
+__all__: list[str] = ["Window", "Maze"]
