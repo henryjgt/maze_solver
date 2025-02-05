@@ -193,7 +193,7 @@ class Maze:
         finish_cell.delete_side("bottom")
         self._animate()
 
-    def get_adjacency(self, col, row) -> dict[str, tuple[int, int]]:
+    def get_adjacent(self, col, row) -> dict[str, tuple[int, int]]:
         return {
             "left": (col - 1, row),
             "right": (col + 1, row),
@@ -204,7 +204,7 @@ class Maze:
     def _break_walls_r(self, col, row) -> None:
         cell: Cell = self._cells[col][row]
         cell._visited = True
-        adjacent_cells: dict[str, tuple[int, int]] = self.get_adjacency(col, row)
+        adjacent_cells: dict[str, tuple[int, int]] = self.get_adjacent(col, row)
         while True:
             unvisited_neighbours: dict[str, Cell] = {}
             for direction, indices in adjacent_cells.items():
@@ -221,9 +221,9 @@ class Maze:
                 return
 
             direction: str = random.choice(list(unvisited_neighbours.keys()))
-            target_cell: Cell = unvisited_neighbours[direction]
             cell.delete_side(direction)
-            target_cell.delete_side(self._map_to_target[direction])
+            next_cell: Cell = unvisited_neighbours[direction]
+            next_cell.delete_side(self._map_to_target[direction])
             self._break_walls_r(*adjacent_cells[direction])
 
     def _reset_cells_visited(self) -> None:
@@ -238,7 +238,7 @@ class Maze:
         self._animate()
         cell: Cell = self._cells[col][row]
         cell._visited = True
-        adjacent_cells: dict[str, tuple[int, int]] = self.get_adjacency(col, row)
+        adjacent_cells: dict[str, tuple[int, int]] = self.get_adjacent(col, row)
 
         if cell == self._cells[-1][-1]:
             return True
@@ -250,13 +250,13 @@ class Maze:
                 (0 <= indices[0] < self.num_cols) and (0 <= indices[1] < self.num_rows)
             ):
                 continue
-            target: Cell = self._cells[indices[0]][indices[1]]
-            if not target._visited:
-                cell.draw_move(target)
+            next_cell: Cell = self._cells[indices[0]][indices[1]]
+            if not next_cell._visited:
+                cell.draw_move(next_cell)
                 progress: bool = self._solve_r(indices[0], indices[1])
                 if progress:
                     return True
                 else:
-                    cell.draw_move(target, undo=True)
+                    cell.draw_move(next_cell, undo=True)
         else:
             return False

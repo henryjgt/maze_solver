@@ -3,8 +3,8 @@ import math as m
 from GUI import Maze, Window
 
 
-WIDTH_PX: int = 700  # x
-HEIGHT_PX: int = 700  # y
+WIDTH_PX: int = 700  # x, x=0 @ top left
+HEIGHT_PX: int = 700  # y, y=0 @ top left
 MARGIN: int = 50
 GRID_SIZE: int = 15  # no. cols & rows
 
