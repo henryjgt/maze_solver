@@ -1,6 +1,6 @@
 import unittest
 
-from GUI import Maze
+from graphics import Maze
 
 
 class Tests(unittest.TestCase):

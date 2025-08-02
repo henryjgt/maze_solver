@@ -3,7 +3,7 @@ import time
 import tkinter as tk
 from typing import Optional
 
-from Graphics import Square, Line, Point
+from .geometry import Square, Line, Point
 
 
 class Window:
